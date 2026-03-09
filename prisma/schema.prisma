@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  ageRange  AgeRange
+  wishes    Wish[]
+  goals     Goal[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Wish {
+  id          String     @id @default(uuid())
+  content     String
+  ageRange    AgeRange
+  category    Category
+  status      WishStatus @default(ACTIVE)
+  authorId    String
+  author      User       @relation(fields: [authorId], references: [id])
+  goals       Goal[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Goal {
+  id        String     @id @default(uuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  wishId    String
+  wish      Wish       @relation(fields: [wishId], references: [id])
+  status    GoalStatus @default(IN_PROGRESS)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+enum AgeRange {
+  CHILDHOOD      // 0-12
+  TEENS          // 13-19
+  TWENTIES       // 20-29
+  THIRTIES       // 30-39
+  FORTIES        // 40-49
+  FIFTIES        // 50-59
+  SIXTIES_PLUS   // 60+
+}
+
+enum Category {
+  CAREER
+  RELATIONSHIPS
+  ADVENTURE
+  PERSONAL_GROWTH
+  CREATIVITY
+  HEALTH
+}
+
+enum WishStatus {
+  ACTIVE
+  FULFILLED
+  FORGOTTEN
+}
+
+enum GoalStatus {
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
